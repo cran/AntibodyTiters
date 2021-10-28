@@ -11,7 +11,9 @@
 }
 \usage{
 toyABT(fileName = "toy.xlsx", pmax = 7, patients = 20, 
-    outsiderPercent = 2, NaPercent = 10)
+    outsiderPercent = 2, NaPercent = 10, 
+	Attrib = c("Sex", "Age", "VeryLow"), 
+	attribFactors = list(c("F", "M"), c(18, 80), c(TRUE, FALSE)))
 	}
 
 \arguments{
@@ -23,11 +25,17 @@ toyABT(fileName = "toy.xlsx", pmax = 7, patients = 20,
     	of patients with outsider values.}
     \item{NaPercent}{an integer specifying the percentage 
     	of patients with NA values.}
+    \item{Attrib}{a character vector for the names of Attrib.}
+    \item{attribFactors}{a list determining the values of Attrib. 
+    	If the names of Attrib contained "Age", 
+    	two numbers provided here are used as lower and upper limits.}
 }
 
 \examples{
 # toyABT(fileName = "toy.xlsx", pmax = 9, patients = 120, 
-# 	outsiderPercent = 2, NaPercent = 10)
+# 	outsiderPercent = 2, NaPercent = 10, 
+# 	Attrib = c("Sex", "Age", "VeryLow"), 
+# 	attribFactors = list(c("F", "M"), c(18, 80), c(TRUE, FALSE)))
 # The above command will create an excel file with toy data in the current directory. 
 }
 

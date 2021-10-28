@@ -2,7 +2,7 @@
 \alias{idABT}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-    Extracting patient IDs from the dataset.
+    Extracting patient IDs from an ABT class object.
 }
 \description{
     With this function, patient IDs in the ABT class object 

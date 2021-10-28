@@ -17,10 +17,11 @@
     These values are used for the plotting functions 
     \link{plotAllABT} and \link{plotEachABT}.
 }
-\usage{readABT(fileName = "xxx.xlsx")}
+\usage{readABT(fileName = "xxx.xlsx", attribNumeric = "Age")}
 
 \arguments{
     \item{fileName}{a file name to be read.}
+    \item{attribNumeric}{a character vector specifying attribute columns to have numeric values.}
 }
 
 \examples{
