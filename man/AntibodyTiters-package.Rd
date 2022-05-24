@@ -15,8 +15,8 @@ Antibody Titer Analysis of Vaccinated Patients.
   \tabular{ll}{
     Package: \tab AntibodyTiters\cr
     Type: \tab Package\cr
-    Version: \tab 0.1.18\cr
-    Date: \tab 2021-10-26\cr
+    Version: \tab 0.1.24\cr
+    Date: \tab 2022-05-24\cr
     License: \tab GPL-3\cr
   }
   \code{\link{emptyABT}}: Production of an empty xlsx file 

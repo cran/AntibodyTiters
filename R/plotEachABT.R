@@ -2,7 +2,7 @@ plotEachABT <- function(patientID = "patient A", objName = "inData", prefix = ""
 			dayStart = as.integer(NA), dayEnd = as.integer(NA), type = "weeks",
             ylab = "Titer (AU/ml)", savePDF = FALSE, addPoints = FALSE, lwd = 2, 
             logY = TRUE, PDFwidth = 8, PDFheight = 5, main = NULL){
-	if(class(get(objName)) != "ABT") stop("The class must be ABT\n")
+	if(inherits(get(objName), "ABT") != TRUE) stop("The class must be ABT\n")
 	if(is.na(dayStart) == FALSE & is.na(dayEnd) == FALSE & dayStart >= dayEnd){
 		stop("dayStart must be smaller than dayEnd")
 	}

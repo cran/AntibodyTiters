@@ -15,7 +15,7 @@ plotAllABT(objName = "inData", prefix = "",
     alphaFactor = 10, lwd = 2, lineAttrib = "", addPoints = FALSE, 
     orderOfCategories = "", lowessSmooth = FALSE, geometricMean = FALSE,
     lineForPre = FALSE, lineFor1st = FALSE, logY = TRUE, PDFwidth = 8, PDFheight = 5, 
-    main = NULL)
+    main = NULL, omitPreVac = FALSE, lineColDark = FALSE)
 }
 
 \arguments{
@@ -43,6 +43,8 @@ plotAllABT(objName = "inData", prefix = "",
     \item{PDFwidth}{an integer specifying the width of PDF. This is active when \code{savePDF==TRUE}.}
     \item{PDFheight}{an integer specifying the height of PDF. This is active when \code{savePDF==TRUE}.}
     \item{main}{a character for the main title. When not specified, \code{objName} will be used as the title.}
+    \item{omitPreVac}{a logical indicating whether pre-vaccination will be omitted.}
+    \item{lineColDark}{a logical indicating whether line colors will be darkened.}
 }
 
 \examples{
@@ -98,6 +100,42 @@ plotAllABT(objName = "inDataA",
     type = "M1", lineAttrib = "AgeGroup", addPoints = TRUE, 
     orderOfCategories = c("young", "middle", "elderly"), geometricMean = TRUE, 
     lineForPre = TRUE, lineFor1st = TRUE)
+    
+# omitPreVac (type = "days")
+plotAllABT(objName = "inDataA", 
+    type = "days", lineAttrib = "AgeGroup", addPoints = TRUE, 
+    orderOfCategories = c("young", "middle", "elderly"), omitPreVac = FALSE)
+plotAllABT(objName = "inDataA", 
+    type = "days", lineAttrib = "AgeGroup", addPoints = TRUE, 
+    orderOfCategories = c("young", "middle", "elderly"), omitPreVac = TRUE)
+    
+# omitPreVac (type = "M1")
+plotAllABT(objName = "inDataA", 
+    type = "M1", lineAttrib = "AgeGroup", addPoints = TRUE, 
+    orderOfCategories = c("young", "middle", "elderly"), geometricMean = TRUE, 
+    lineForPre = TRUE, lineFor1st = TRUE, omitPreVac = FALSE)
+plotAllABT(objName = "inDataA", 
+    type = "M1", lineAttrib = "AgeGroup", addPoints = TRUE, 
+    orderOfCategories = c("young", "middle", "elderly"), geometricMean = TRUE, 
+    lineForPre = FALSE, lineFor1st = TRUE, omitPreVac = TRUE)
+    
+# lineColDark (type = "days")
+plotAllABT(objName = "inDataA", 
+    type = "days", lineAttrib = "AgeGroup", addPoints = TRUE, 
+    orderOfCategories = c("young", "middle", "elderly"), lineColDark = FALSE)
+plotAllABT(objName = "inDataA", 
+    type = "days", lineAttrib = "AgeGroup", addPoints = TRUE, 
+    orderOfCategories = c("young", "middle", "elderly"), lineColDark = TRUE)
+    
+# lineColDark (type = "M1")
+plotAllABT(objName = "inDataA", 
+    type = "M1", lineAttrib = "AgeGroup", addPoints = TRUE, 
+    orderOfCategories = c("young", "middle", "elderly"), geometricMean = TRUE, 
+    lineForPre = TRUE, lineFor1st = TRUE, lineColDark = FALSE)
+plotAllABT(objName = "inDataA", 
+    type = "M1", lineAttrib = "AgeGroup", addPoints = TRUE, 
+    orderOfCategories = c("young", "middle", "elderly"), geometricMean = TRUE, 
+    lineForPre = TRUE, lineFor1st = TRUE, lineColDark = TRUE)
 }
 
 \value{

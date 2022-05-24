@@ -17,6 +17,12 @@ readABT <- function(fileName = "xxx.xlsx", attribNumeric = "Age"){
 		}
 	}
 
+	# 20211122
+	score.col.index <- grep(pattern = "_score", colnames(inData))
+	for(s in 1:length(score.col.index)){
+		class(inData[[score.col.index[s]]]) <- "numeric"
+	}
+	
 	additional.colnames <- colnames(inData)[10:ncol(inData)]
 	point.index <- grep(pattern = "point", additional.colnames)
 	yyyymmdd.index <- grep(pattern = "_yyyymmdd", additional.colnames)
@@ -89,9 +95,29 @@ readABT <- function(fileName = "xxx.xlsx", attribNumeric = "Age"){
 	}
 
 	yyyymmddCols <- colnames(inData)[grep(pattern = "_yyyymmdd", colnames(inData))]
+	
+	# 20211213
+	key <- FALSE
 	for(i in 1:length(yyyymmddCols)){
+
+		# 20211213
+		dayCheck <- inData[[yyyymmddCols[i]]]
+		noNAindex <- is.na(dayCheck) == FALSE
+		for(d in 1:length(dayCheck)){
+			if(is.na(dayCheck[d]) == FALSE){
+				if(nchar(dayCheck[d]) != 8){
+					cat("Date must be written in yyyymmdd: ID=", inData$ID[d], " value=", dayCheck[d], 
+							" colname=", yyyymmddCols[i], "\n", sep = "")
+					key <- TRUE
+				}
+			}
+		}
+		
 		inData[[yyyymmddCols[i]]] <- as.Date(as.character(inData[[yyyymmddCols[i]]]), "%Y%m%d")
 	}
+	
+	# 20211213
+	if(key == TRUE)	stop("Reading failed. Check the dates")
 
 	pmax <- p - 1
 
@@ -277,14 +303,14 @@ readABT <- function(fileName = "xxx.xlsx", attribNumeric = "Age"){
 	}
 	if(length(attrib.index) > 0){
 	for(a in 1:length(inData$Attrib)){
-		if(class(inData$DATA[[names(inData$Attrib[a])]]) != "numeric"){
+		if(inherits(inData$DATA[[names(inData$Attrib[a])]], "numeric") != TRUE){
 			cat(paste(names(inData$Attrib)[a], ":\n", sep = ""))
 			for(i in 1:length(inData$Attrib[[a]])){
 				cat("  ", paste(names(inData$Attrib[[a]][i]), ": ", 
 							as.character(inData$Attrib[[a]][i]), "\n", sep = ""))
 			}
 		}
-		if(class(inData$DATA[[names(inData$Attrib[a])]]) == "numeric"){
+		if(inherits(inData$DATA[[names(inData$Attrib[a])]], "numeric") == TRUE){
 			cat(paste(names(inData$Attrib)[a], ":\n", sep = ""))
 			temp <- summary(inData$Attrib[[a]])
 			cat(paste("  ", "Min:    ", temp[1], "\n"))

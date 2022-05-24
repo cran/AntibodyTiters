@@ -1,6 +1,6 @@
 Package: AntibodyTiters
-Version: 0.1.18
-Date: 2021-10-26
+Version: 0.1.24
+Date: 2022-05-24
 Title: Antibody Titer Analysis of Vaccinated Patients
 Authors@R: c(person("Yuuki", "Mizumoto", role=c("aut")), 
 		person("Hiroaki", "Kato", role=c("aut", "cre"), 
@@ -24,6 +24,6 @@ Description: Visualization of antibody titer scores is valuable for examination 
 License: GPL-3
 NeedsCompilation: no
 Type: Package
-Packaged: 2021-10-26 07:23:09 UTC; hrk_kato
+Packaged: 2022-05-24 03:25:52 UTC; hrk_kato
 Repository: CRAN
-Date/Publication: 2021-10-28 04:20:05 UTC
+Date/Publication: 2022-05-24 04:10:02 UTC

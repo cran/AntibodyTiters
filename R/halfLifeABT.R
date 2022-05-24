@@ -55,7 +55,7 @@ halfLifeABT <- function(x, output = "list", OutFileName = "Thalf.xlsx"){
 		outDF <- outList[[1]]
 		if(length(outList) > 1){
 			for(l in 2:length(outList)){
-				if(class(outList[[l]]) == "data.frame"){
+				if(inherits(outList[[l]], "data.frame")){
 					outDF <- rbind(outDF, outList[[l]])
 				}
 			}

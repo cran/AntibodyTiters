@@ -2,12 +2,12 @@ plotAllABT_discrete <- function(objName = "inData", prefix = "",
 			dayStart = as.integer(NA), dayEnd = as.integer(NA), type = "M1", rainbow = FALSE, ylab = "Titer (AU)", 
 			savePDF = FALSE, alphaFactor = 10, lwd = 2, lineAttrib = "", addPoints = FALSE, 
 			orderOfCategories = "", lowessSmooth = FALSE, geometricMean = FALSE, lineForPre = FALSE, lineFor1st = FALSE, 
-			logY = TRUE, PDFwidth = 8, PDFheight = 5, main = NULL){
+			logY = TRUE, PDFwidth = 8, PDFheight = 5, main = NULL, omitPreVac = FALSE, lineColDark = FALSE){
 	# orderOfCategories = c("young", "middle", "elderly")
 	
 	if(is.null(main) == TRUE) main <- objName
 								
-	if(class(get(objName)) != "ABT") stop("The class must be ABT\n")
+	if(inherits(get(objName), "ABT") != TRUE) stop("The class must be ABT\n")
 	if(is.na(dayStart) == FALSE & is.na(dayEnd) == FALSE & dayStart >= dayEnd){
 		stop("dayStart must be smaller than dayEnd")
 	}
@@ -120,6 +120,8 @@ plotAllABT_discrete <- function(objName = "inData", prefix = "",
 
 	# x <- c(1:3, 4:(3+length(colNames)))
 	x <- c(1:2, 3:(2+length(colNames)))
+	# if(omitPreVac == FALSE)	x <- c(1:2, 3:(2+length(colNames)))
+	# if(omitPreVac == TRUE)	x <- c(-1, 2, 3:(2+length(colNames)))
 	# ylim <- c(0, max(temp[, grep(pattern = "score", colnames(temp))], na.rm = TRUE))
 
 	temp2 <- temp
@@ -136,13 +138,14 @@ plotAllABT_discrete <- function(objName = "inData", prefix = "",
        
 	if(savePDF == TRUE)	pdf(file = fileName, width = PDFwidth, height = PDFheight)
     
-	if(lineAttrib != "" & class(temp2[[lineAttrib]]) != "numeric"){
+	if(lineAttrib != "" & inherits(temp2[[lineAttrib]], "numeric") != TRUE){
 			categories <- names(Attrib[[lineAttrib]])
 			categories <- categories[order(categories)]
 			if(orderOfCategories[1] != "")	categories <- orderOfCategories
-			COLs <- hcl.colors(n = length(categories), palette = "Dynamic", alpha = 0.8)
-			pointCOLs <- hcl.colors(n = length(categories), palette = "Dynamic", alpha = 0.3)
-			lineCOLs <- hcl.colors(n = length(categories), palette = "Dynamic", alpha = alpha)
+			COLs <- hcl.colors(n = length(categories), palette = "Dynamic", rev = TRUE, alpha = 0.8)
+			COLsDark <- rgb(t(col2rgb(COLs)/1.2), maxColorValue=255)
+			pointCOLs <- hcl.colors(n = length(categories), palette = "Dynamic", rev = TRUE, alpha = 0.3)
+			lineCOLs <- hcl.colors(n = length(categories), palette = "Dynamic", rev = TRUE, alpha = alpha)
 	}	
 	
      
@@ -153,8 +156,14 @@ plotAllABT_discrete <- function(objName = "inData", prefix = "",
 		ymax <- max(total.scores, na.rm = TRUE)
 		ymax <- ymax * 1.1
 		ylim <- c(ymin, ymax)
-		plot(x = x, y = numeric(length = length(x)), ylim = ylim, main = main, 
-			xaxt = "n", yaxt = "n", type = "n", xlab = xlab, ylab = ylab)
+		if(omitPreVac == FALSE){
+			plot(x = x, y = numeric(length = length(x)), ylim = ylim, main = main, 
+				xaxt = "n", yaxt = "n", type = "n", xlab = xlab, ylab = ylab)
+		}
+		if(omitPreVac == TRUE){
+			plot(x = x[2:length(x)], y = numeric(length = length(x)-1), ylim = ylim, main = main, 
+				xaxt = "n", yaxt = "n", type = "n", xlab = xlab, ylab = ylab)
+		}
 		FROM <- floor(ymin/10000)
 		# BY <- floor((ymax - ymin)/5/100)*10^floor(log(ymax, base = 10))
 		TO <- ceiling(ymax/10^(floor(log(ymax, base = 10))))*10^(floor(log(ymax, base = 10)))
@@ -180,8 +189,14 @@ plotAllABT_discrete <- function(objName = "inData", prefix = "",
 		ylim <- c(ymin, ymax)
 		xtemp <- numeric(length = length(x))
 		xtemp[1:length(x)] <- 1
-		plot(x = x, y = xtemp, ylim = ylim, main = main, 
-			xaxt = "n", yaxt = "n", type = "n", xlab = xlab, ylab = ylab, log = "y")
+		if(omitPreVac == FALSE){
+			plot(x = x, y = xtemp, ylim = ylim, main = main, 
+				xaxt = "n", yaxt = "n", type = "n", xlab = xlab, ylab = ylab, log = "y")
+		}
+		if(omitPreVac == TRUE){
+			plot(x = x[2:length(x)], y = xtemp[2:length(x)], ylim = ylim, main = main, 
+				xaxt = "n", yaxt = "n", type = "n", xlab = xlab, ylab = ylab, log = "y")
+		}
 		FROM <- floor(log(ymin, base = 10))
 		TO <- floor(log(ymax, base = 10))+1
 		AT <- integer(length = (TO - FROM + 1) * 10 - (TO - FROM))
@@ -215,8 +230,15 @@ plotAllABT_discrete <- function(objName = "inData", prefix = "",
 		}
 	}
 
-	axis(1, at = 1:2, labels = c("pre", "1st"), lwd = lwd)
-	axis(1, at = 3:length(x), labels = x.labels, lwd = lwd)
+	if(omitPreVac == FALSE){
+		axis(1, at = 1:2, labels = c("pre", "1st"), lwd = lwd)
+		axis(1, at = 3:length(x), labels = x.labels, lwd = lwd)
+	}
+	if(omitPreVac == TRUE){
+		axis(1, at = c(-1, 2), labels = c("pre", "1st"), lwd = lwd)
+		axis(1, at = 3:length(x), labels = x.labels, lwd = lwd)
+	}
+	
 	box(lwd = lwd)
 
         patients.max <- nrow(temp2)+1
@@ -245,19 +267,26 @@ plotAllABT_discrete <- function(objName = "inData", prefix = "",
 		x.patient <- x[is.na(temp2.scores) == FALSE]
 		temp2.scores.patient <- temp2.scores[is.na(temp2.scores) == FALSE]
 		
+        # if(omitPreVac == TRUE){
+		# 	x.patient <- x.patient[x.patient != 1]
+		# 	temp2.scores.patient <- temp2.scores.patient[x.patient != 1]
+		# }
 
         if(rainbow == TRUE){
-                lines(x = x.patient, y = temp2.scores.patient, lty = 1, lwd = lwd, 
-                					col = rainbow(1, start = p/patients.max, alpha = alpha)) 
+                lines(x = x.patient, 
+                		y = temp2.scores.patient, lty = 1, lwd = lwd, 
+                		col = rainbow(1, start = p/patients.max, alpha = alpha)) 
         }
         if(rainbow == FALSE){
-        	if(lineAttrib == "" | class(temp2[[lineAttrib]]) == "numeric"){
-                lines(x = x.patient, y = temp2.scores.patient, lty = 1, lwd = lwd, col = gray(0, alpha = alpha)) 
+        	if(lineAttrib == "" | inherits(temp2[[lineAttrib]], "numeric") == TRUE){
+               lines(x = x.patient, 
+                		y = temp2.scores.patient, lty = 1, lwd = lwd, col = gray(0, alpha = alpha)) 
             }
-        	if(lineAttrib != "" & class(temp2[[lineAttrib]]) != "numeric"){
+        	if(lineAttrib != "" & inherits(temp2[[lineAttrib]], "numeric") != TRUE){
         		c <- which(temp2[[lineAttrib]][p] == categories)
-			    lines(x = x.patient, y = temp2.scores.patient, lty = 1, lwd = lwd, col = lineCOLs[c])
-			}
+			    lines(x = x.patient, 
+                		y = temp2.scores.patient, lty = 1, lwd = lwd, col = lineCOLs[c])
+            }
 		}
 	}
 	
@@ -266,10 +295,10 @@ plotAllABT_discrete <- function(objName = "inData", prefix = "",
 		if(length(grep(pattern = lineAttrib, x = names(Attrib))) == 0){
 			stop("lineAttrib must be found in the Attrib of the given ABT object")
 		}
-		if(class(temp2[[lineAttrib]]) == "numeric"){
+		if(inherits(temp2[[lineAttrib]], "numeric") == TRUE){
 			stop("lineAttrib cannot be applied for numeric values")
 		}
-		if(class(temp2[[lineAttrib]]) != "numeric"){
+		if(inherits(temp2[[lineAttrib]], "numeric") != TRUE){
 			for(c in 1:length(categories)){
 				
 				temp3 <- subset(temp2, temp2[[lineAttrib]] == categories[c])
@@ -311,6 +340,9 @@ plotAllABT_discrete <- function(objName = "inData", prefix = "",
 				
 				RAW <- RAW[is.na(RAW) == FALSE]
 				
+				if(omitPreVac == TRUE){
+					RAW[["Pre"]] <- NA
+				}
 				
 				if(addPoints == TRUE){
 					for(mx in 1:length(RAW)){
@@ -360,7 +392,12 @@ plotAllABT_discrete <- function(objName = "inData", prefix = "",
 						lowess.x <- lowess.x[names(lowess.x) != "Post1st"]
 					}
 					lowess.index <- is.na(RAW3$l) == FALSE
-					lines(x = lowess.x[lowess.index], y = RAW3$l[lowess.index], col = COLs[c], lwd = lwd*2)
+					if(lineColDark == FALSE){
+						lines(x = lowess.x[lowess.index], y = RAW3$l[lowess.index], col = COLs[c], lwd = lwd*2)
+					}
+					if(lineColDark == TRUE){
+						lines(x = lowess.x[lowess.index], y = RAW3$l[lowess.index], col = COLsDark[c], lwd = lwd*2)
+					}
 				} # if(lowessSmooth == TRUE)
 
 
@@ -415,18 +452,35 @@ plotAllABT_discrete <- function(objName = "inData", prefix = "",
 					for(l in 1:nrow(GMDF)){
 						xShiftFactor <- 0.05 * length(x) /12
 						shifted.x <- GMDF$x.axis[l] - ((length(categories) * xShiftFactor)/2) + (c-1) * xShiftFactor
-						lines(x = c(shifted.x, shifted.x), 
+						if(lineColDark == FALSE){
+							lines(x = c(shifted.x, shifted.x), 
 										y = c(GMDF$lwr.ci[l], GMDF$mean[l]), col = COLs[c], lwd = lwd)
-						lines(x = c(shifted.x-0.1, shifted.x +0.1), 
+							lines(x = c(shifted.x-0.1, shifted.x +0.1), 
 										y = c(GMDF$lwr.ci[l], GMDF$lwr.ci[l]), col = COLs[c], lwd = lwd)
-						lines(x = c(shifted.x, shifted.x), 
+							lines(x = c(shifted.x, shifted.x), 
 										y = c(GMDF$upr.ci[l], GMDF$mean[l]), col = COLs[c], lwd = lwd)
-						lines(x = c(shifted.x-0.1, shifted.x +0.1), 
+							lines(x = c(shifted.x-0.1, shifted.x +0.1), 
 										y = c(GMDF$upr.ci[l], GMDF$upr.ci[l]), col = COLs[c], lwd = lwd)
+						}
+						if(lineColDark == TRUE){
+							lines(x = c(shifted.x, shifted.x), 
+										y = c(GMDF$lwr.ci[l], GMDF$mean[l]), col = COLsDark[c], lwd = lwd)
+							lines(x = c(shifted.x-0.1, shifted.x +0.1), 
+										y = c(GMDF$lwr.ci[l], GMDF$lwr.ci[l]), col = COLsDark[c], lwd = lwd)
+							lines(x = c(shifted.x, shifted.x), 
+										y = c(GMDF$upr.ci[l], GMDF$mean[l]), col = COLsDark[c], lwd = lwd)
+							lines(x = c(shifted.x-0.1, shifted.x +0.1), 
+										y = c(GMDF$upr.ci[l], GMDF$upr.ci[l]), col = COLsDark[c], lwd = lwd)
+						}
 					}
 					
 					shiftedX <- GMDF$x.axis - ((length(categories) * xShiftFactor)/2) + (c-1) * xShiftFactor
-					lines(x = shiftedX, y = GMDF$mean, col = COLs[c], lwd = lwd*2)
+					if(lineColDark == FALSE){
+						lines(x = shiftedX, y = GMDF$mean, col = COLs[c], lwd = lwd*2)
+					}
+					if(lineColDark == TRUE){
+						lines(x = shiftedX, y = GMDF$mean, col = COLsDark[c], lwd = lwd*2)
+					}
 				} # if(geometricMean == TRUE)
 				
 				legendX <- 3+length(colNames) - (3+length(colNames))/3
@@ -434,8 +488,14 @@ plotAllABT_discrete <- function(objName = "inData", prefix = "",
 				if(logY == FALSE)	legendY <- ylim[2] - (ylim[2] - ylim[1])/10*c
 				if(logY == TRUE)	legendY <- 10^(log(ylim[2], base = 10) - 
 								((log(ylim[2], base = 10) - log(ylim[1], base = 10))/15*(c)))	# c+1 or c?
-				legend(x = legendX, y = legendY, col = COLs[c], lwd = lwd*2, 
-					legend = categories[c], bty = "n")
+				if(lineColDark == FALSE){
+					legend(x = legendX, y = legendY, col = COLs[c], lwd = lwd*2, 
+						legend = categories[c], bty = "n")
+				}
+				if(lineColDark == TRUE){
+					legend(x = legendX, y = legendY, col = COLsDark[c], lwd = lwd*2, 
+						legend = categories[c], bty = "n")
+				}
 				if(c == 1){
 					legendX <- 2+length(colNames) - (2+length(colNames))/4
 					# legendY <- ylim[2] - (ylim[2] - ylim[1])/10*c * 1.4

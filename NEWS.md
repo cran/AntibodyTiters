@@ -62,3 +62,18 @@
 
 ## AntibodyTiters 0.1.18
 * Documents were improved for CRAN submission.
+
+## AntibodyTiters 0.1.19
+* Bug fix for plotAllABT().
+
+## AntibodyTiters 0.1.20
+* yyyymmdd checking implemented.
+
+## AntibodyTiters 0.1.21
+* Omission of pre-vaccination scores implemented.
+
+## AntibodyTiters 0.1.22
+* Color specifying option implemented.
+
+## AntibodyTiters 0.1.23
+* Omission of pre-vaccination scores improved.

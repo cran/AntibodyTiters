@@ -2,7 +2,7 @@ plotAllABT <- function(objName = "inData", prefix = "",
 			dayStart = as.integer(NA), dayEnd = as.integer(NA), type = "weeks", rainbow = FALSE, ylab = "Titer (AU/ml)", 
 			savePDF = FALSE, alphaFactor = 10, lwd = 2, lineAttrib = "", addPoints = FALSE, 
 			orderOfCategories = "", lowessSmooth = FALSE, geometricMean = FALSE, lineForPre = FALSE, lineFor1st = FALSE, 
-			logY = TRUE, PDFwidth = 8, PDFheight = 5, main = NULL){
+			logY = TRUE, PDFwidth = 8, PDFheight = 5, main = NULL, omitPreVac = FALSE, lineColDark = FALSE){
 	# orderOfCategories = c("young", "middle", "elderly")
 	
 	if(is.null(main) == TRUE) main <- objName
@@ -14,11 +14,12 @@ plotAllABT <- function(objName = "inData", prefix = "",
 			lwd = lwd, lineAttrib = lineAttrib, addPoints = addPoints, 
 			orderOfCategories = orderOfCategories, lowessSmooth = lowessSmooth, 
 			geometricMean = geometricMean, lineForPre = lineForPre, lineFor1st = lineFor1st, logY = logY, 
-			PDFwidth = 8, PDFheight = 5, main = main)
+			PDFwidth = PDFwidth, PDFheight = PDFheight, main = main, omitPreVac = omitPreVac, 
+			lineColDark = lineColDark)
 	}
 	
 	if(type == "days" | type == "weeks"){	
-	if(class(get(objName)) != "ABT") stop("The class must be ABT\n")
+	if(inherits(get(objName), "ABT") != TRUE) stop("The class must be ABT\n")
 	if(is.na(dayStart) == FALSE & is.na(dayEnd) == FALSE & dayStart >= dayEnd){
 		stop("dayStart must be smaller than dayEnd")
 	}
@@ -76,7 +77,9 @@ plotAllABT <- function(objName = "inData", prefix = "",
 	pos1st <- shortestFromSecond - xRange*1/8
 	# xFromSecond <- c(posPre, pos1st, from.secondShot[-(1:2)])		
 	
-	xlim <- c(posPre, longestFromSecond)
+	if(omitPreVac == FALSE)	xlim <- c(posPre, longestFromSecond)
+	if(omitPreVac == TRUE)	xlim <- c(pos1st, longestFromSecond)
+	
 	#ylim <- c(0, max(temp[, grep(pattern = "score", colnames(temp))], na.rm = TRUE))
 
 	temp2 <- temp
@@ -93,13 +96,14 @@ plotAllABT <- function(objName = "inData", prefix = "",
     
 	if(savePDF == TRUE)	pdf(file = fileName, width = PDFwidth, height = PDFheight)
     
-	if(lineAttrib != "" & class(temp2[[lineAttrib]]) != "numeric"){
+	if(lineAttrib != "" & inherits(temp2[[lineAttrib]], "numeric") != TRUE){
 			categories <- names(Attrib[[lineAttrib]])
 			categories <- categories[order(categories)]
 			if(orderOfCategories[1] != "")	categories <- orderOfCategories
-			COLs <- hcl.colors(n = length(categories), palette = "Dynamic", alpha = 0.8)
-			pointCOLs <- hcl.colors(n = length(categories), palette = "Dynamic", alpha = 0.3)
-			lineCOLs <- hcl.colors(n = length(categories), palette = "Dynamic", alpha = alpha)
+			COLs <- hcl.colors(n = length(categories), palette = "Dynamic", rev = TRUE, alpha = 0.8)
+			COLsDark <- rgb(t(col2rgb(COLs)/1.2), maxColorValue=255)
+			pointCOLs <- hcl.colors(n = length(categories), palette = "Dynamic", rev = TRUE, alpha = 0.3)
+			lineCOLs <- hcl.colors(n = length(categories), palette = "Dynamic", rev = TRUE, alpha = alpha)
 	}
 
     total.scores <- temp2[, grep(pattern = "_score", x = colnames(temp2))]
@@ -169,8 +173,9 @@ plotAllABT <- function(objName = "inData", prefix = "",
 		}
 	}
 
-	axis(1, at = c(posPre, pos1st), 
-			labels = c("pre", "1st"), lwd = lwd)
+	if(omitPreVac == FALSE)	axis(1, at = c(posPre, pos1st), labels = c("pre", "1st"), lwd = lwd)
+	if(omitPreVac == TRUE)	axis(1, at = c(pos1st), labels = c("1st"), lwd = lwd)
+	
 	if(type == "weeks") axis(1, at = seq(floor(shortestFromSecond/10)*10, longestFromSecond, 10), lwd = lwd)
 	if(type == "days") axis(1, at = seq(floor(shortestFromSecond/50)*50, longestFromSecond, 50), lwd = lwd)
 	# axis(2, lwd = lwd)
@@ -222,19 +227,35 @@ plotAllABT <- function(objName = "inData", prefix = "",
 		}
 
         if(rainbow == TRUE){
-                lines(x = xFromSecond[1:3], y = temp2.scores[1:3], lty = 1, lwd = lwd, 
-                					col = rainbow(1, start = p/patients.max, alpha = alpha)) 
+                if(omitPreVac == FALSE){
+                	lines(x = xFromSecond[1:3], y = temp2.scores[1:3], lty = 1, lwd = lwd, 
+                					col = rainbow(1, start = p/patients.max, alpha = alpha))
+                }
+                if(omitPreVac == TRUE){
+                	lines(x = xFromSecond[2:3], y = temp2.scores[2:3], lty = 1, lwd = lwd, 
+                					col = rainbow(1, start = p/patients.max, alpha = alpha))
+                }
                 lines(x = xFromSecond[-(1:2)], y = temp2.scores[-(1:2)], lwd = lwd, 
                 					col = rainbow(1, start = p/patients.max, alpha = alpha))
         }
         if(rainbow == FALSE){
-        	if(lineAttrib == "" | class(temp2[[lineAttrib]]) == "numeric"){
-                lines(x = xFromSecond[1:3], y = temp2.scores[1:3], lty = 1, lwd = lwd, col = gray(0, alpha = alpha)) 
+        	if(lineAttrib == "" | inherits(temp2[[lineAttrib]], "numeric") == TRUE){
+                if(omitPreVac == FALSE){
+                	lines(x = xFromSecond[1:3], y = temp2.scores[1:3], lty = 1, lwd = lwd, col = gray(0, alpha = alpha)) 
+                }
+                if(omitPreVac == TRUE){
+                	lines(x = xFromSecond[2:3], y = temp2.scores[2:3], lty = 1, lwd = lwd, col = gray(0, alpha = alpha)) 
+                }
                 lines(x = xFromSecond[-(1:2)], y = temp2.scores[-(1:2)], lwd = lwd, col = gray(0, alpha = alpha))
             }
-        	if(lineAttrib != "" & class(temp2[[lineAttrib]]) != "numeric"){
+        	if(lineAttrib != "" & inherits(temp2[[lineAttrib]], "numeric") != TRUE){
         		c <- which(temp2[[lineAttrib]][p] == categories)
-                lines(x = xFromSecond[1:3], y = temp2.scores[1:3], lty = 1, lwd = lwd, col = lineCOLs[c]) 
+                if(omitPreVac == FALSE){
+                	lines(x = xFromSecond[1:3], y = temp2.scores[1:3], lty = 1, lwd = lwd, col = lineCOLs[c]) 
+                }
+                if(omitPreVac == TRUE){
+                	lines(x = xFromSecond[2:3], y = temp2.scores[2:3], lty = 1, lwd = lwd, col = lineCOLs[c]) 
+                }
                 lines(x = xFromSecond[-(1:2)], y = temp2.scores[-(1:2)], lwd = lwd, col = lineCOLs[c])
             }
 		}
@@ -246,10 +267,10 @@ plotAllABT <- function(objName = "inData", prefix = "",
 		if(length(grep(pattern = lineAttrib, x = names(Attrib))) == 0){
 			stop("lineAttrib must be found in the Attrib of the given ABT object")
 		}
-		if(class(temp2[[lineAttrib]]) == "numeric"){
+		if(inherits(temp2[[lineAttrib]], "numeric") == TRUE){
 			stop("lineAttrib cannot be applied for numeric values")
 		}
-		if(class(temp2[[lineAttrib]]) != "numeric"){
+		if(inherits(temp2[[lineAttrib]], "numeric") != TRUE){
 			for(c in 1:length(categories)){
 				
 				if(is.na(dayStart) == TRUE)	shortestFromSecond <- get(objName)$shortestFromSecond
@@ -323,19 +344,45 @@ plotAllABT <- function(objName = "inData", prefix = "",
 					longestFromSecond <- longestFromSecond*1/7
 				}
 				if(addPoints == TRUE){
-					points(x = RAW3$x, y = RAW3$score, pch = 20, cex = 0.8, col = pointCOLs[c])
+					if(omitPreVac == FALSE){
+                		points(x = RAW3$x, y = RAW3$score, pch = 20, cex = 0.8, col = pointCOLs[c])
+                	}
+					if(omitPreVac == TRUE){
+                		points(x = RAW3$x[2:nrow(RAW3)], y = RAW3$score[2:nrow(RAW3)], pch = 20, cex = 0.8, col = pointCOLs[c])
+                	}
 				}
 				
 				if(lowessSmooth == TRUE){
-					lines(x = RAW3$x, y = RAW3$l, col = COLs[c], lwd = lwd*2)
+					if(lineColDark == FALSE){
+						if(omitPreVac == FALSE){
+                			lines(x = RAW3$x, y = RAW3$l, col = COLs[c], lwd = lwd*2)
+                		}
+						if(omitPreVac == TRUE){
+                			lines(x = RAW3$x[2:nrow(RAW3)], y = RAW3$l[2:nrow(RAW3)], col = COLs[c], lwd = lwd*2)
+                		}
+                	}
+					if(lineColDark == TRUE){
+						if(omitPreVac == FALSE){
+                			lines(x = RAW3$x, y = RAW3$l, col = COLsDark[c], lwd = lwd*2)
+                		}
+						if(omitPreVac == TRUE){
+                			lines(x = RAW3$x[2:nrow(RAW3)], y = RAW3$l[2:nrow(RAW3)], col = COLsDark[c], lwd = lwd*2)
+                		}
+                	}
 				}
 								
 				legendX <- longestFromSecond - (longestFromSecond - shortestFromSecond)/3		# 3 or 4
 				if(logY == FALSE)	legendY <- ylim[2] - (ylim[2] - ylim[1])/10*c
 				if(logY == TRUE)	legendY <- 10^(log(ylim[2], base = 10) - 
 								((log(ylim[2], base = 10) - log(ylim[1], base = 10))/15*(c)))	# c+1 or c?
-				legend(x = legendX, y = legendY, col = COLs[c], lwd = lwd*2, 
-					legend = categories[c], bty = "n")
+				if(lineColDark == FALSE){
+						legend(x = legendX, y = legendY, col = COLs[c], lwd = lwd*2, 
+							legend = categories[c], bty = "n")
+				}
+				if(lineColDark == TRUE){
+						legend(x = legendX, y = legendY, col = COLsDark[c], lwd = lwd*2, 
+							legend = categories[c], bty = "n")
+				}
 				if(c == 1){
 					legendX <- longestFromSecond - (longestFromSecond - shortestFromSecond)/3.5		# 4.5
 					# legendY <- ylim[2] - (ylim[2] - ylim[1])/10*c * 1.4
